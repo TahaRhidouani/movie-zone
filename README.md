@@ -11,48 +11,48 @@
 
 **Features a beautiful inviting UI**
 
-![home](./Screenshots/Screenshot_1.png)
+![home](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_1.png)
 
 <br />
 
 **You can login to save movies to your watchlist**
 
-![login](./Screenshots/Screenshot_2.png)
+![login](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_2.png)
 
 <br />
 
 **Access very thorough filter queries**
 
-![birthday](./Screenshots/Screenshot_3.png)
+![birthday](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_3.png)
 
 <br />
 
 **Search what's popular right now**
 
-![popular](./Screenshots/Screenshot_4.png)
+![popular](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_4.png)
 
 <br />
 
 **Gorgeous movie views with complete information**
 
-![movie](./Screenshots/Screenshot_5.png)
+![movie](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_5.png)
 
 <br />
 
 **An exhaustive actor view with all the movies they star in**
 
-![actor](./Screenshots/Screenshot_6.png)
+![actor](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_6.png)
 
 <br />
 
 **Easily view and edit your watchlist**
 
-![watchlist](./Screenshots/Screenshot_7.png)
+![watchlist](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_7.png)
 
 <br />
 
 **A powerful and instant searchbar**
 
-![search](./Screenshots/Screenshot_8.png)
+![search](https://github.com/TahaInc/smart-monitor/blob/master/images/screenshot_8.png)
 
 <br />
