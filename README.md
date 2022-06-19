@@ -11,48 +11,48 @@
 
 **Features a beautiful inviting UI**
 
-![home](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_1.png)
+![home](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_1.png)
 
 <br />
 
 **You can login to save movies to your watchlist**
 
-![login](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_2.png)
+![login](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_2.png)
 
 <br />
 
 **Access very thorough filter queries**
 
-![birthday](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_3.png)
+![birthday](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_3.png)
 
 <br />
 
 **Search what's popular right now**
 
-![popular](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_4.png)
+![popular](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_4.png)
 
 <br />
 
 **Gorgeous movie views with complete information**
 
-![movie](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_5.png)
+![movie](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_5.png)
 
 <br />
 
 **An exhaustive actor view with all the movies they star in**
 
-![actor](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_6.png)
+![actor](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_6.png)
 
 <br />
 
 **Easily view and edit your watchlist**
 
-![watchlist](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_7.png)
+![watchlist](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_7.png)
 
 <br />
 
 **A powerful and instant searchbar**
 
-![search](https://github.com/TahaInc/movie-zone/blob/master/images/screenshot_8.png)
+![search](https://raw.githubusercontent.com/TahaInc/movie-zone/master/images/screenshot_8.png)
 
 <br />
