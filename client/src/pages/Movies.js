@@ -10,7 +10,7 @@ const Movies = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("http://localhost:8888/" + props.type + "/" + category, {
+    fetch("http://localhost:1112/" + props.type + "/" + category, {
       credentials: "include",
       method: "get",
       cache: "no-cache",

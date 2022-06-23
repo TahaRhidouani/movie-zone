@@ -15,7 +15,7 @@ const Movie = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("http://localhost:8888/" + props.type + "/" + id, {
+    fetch("http://localhost:1112/" + props.type + "/" + id, {
       credentials: "include",
       method: "post",
       cache: "no-cache",
@@ -29,7 +29,7 @@ const Movie = (props) => {
   }, [props, id]);
 
   function toggleWatchlist() {
-    fetch("http://localhost:8888/watchlist/" + id, {
+    fetch("http://localhost:1112/watchlist/" + id, {
       credentials: "include",
       method: !inWatchlist ? "post" : "delete",
       cache: "no-cache",

@@ -4,7 +4,7 @@ const app = express();
 const cors = require("cors");
 const session = require("express-session");
 
-app.use(cors({ credentials: true, origin: "http://localhost:3001" }));
+app.use(cors({ credentials: true, origin: "http://localhost:1113" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: "movie-zone-secret-key", resave: false, saveUninitialized: false }));
 app.use(express.json());
@@ -192,8 +192,8 @@ app.delete("/watchlist/:id", (req, res) => {
   res.status(200).send();
 });
 
-app.listen(8888, () => {
-  console.log("listening on port 8888");
+app.listen(1112, () => {
+  console.log("listening on port 1112");
 });
 
 function validCredentials(username, password) {

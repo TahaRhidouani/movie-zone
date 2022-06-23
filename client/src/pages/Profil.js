@@ -7,7 +7,7 @@ const Profil = (props) => {
   const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
-    fetch("http://localhost:8888/watchlist", { credentials: "include", cache: "no-cache" }).then(async (response) => {
+    fetch("http://localhost:1112/watchlist", { credentials: "include", cache: "no-cache" }).then(async (response) => {
       if (response.ok) setUserInfo(await response.json());
     });
   }, [props]);

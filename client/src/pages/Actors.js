@@ -12,7 +12,7 @@ const Actors = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("http://localhost:8888/actors/" + category, {
+    fetch("http://localhost:1112/actors/" + category, {
       credentials: "include",
       method: "get",
       cache: "no-cache",
