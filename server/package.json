@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "better-sqlite3": "^7.5.0",
+    "better-sqlite3": "^7.5.3",
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "express-session": "^1.17.2"

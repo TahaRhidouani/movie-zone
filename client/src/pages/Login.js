@@ -12,7 +12,7 @@ const Login = () => {
     if (document.getElementById("username").value === "" || document.getElementById("password").value === "") {
       setError("Empty field");
     } else {
-      fetch("/login", {
+      fetch("/process.env.PUBLIC_URL/login", {
         credentials: "include",
         method: "post",
         cache: "no-cache",
@@ -33,7 +33,7 @@ const Login = () => {
     } else if (document.getElementById("password1").value.length < 6) {
       setError("Password too short");
     } else {
-      fetch("/register", {
+      fetch("/process.env.PUBLIC_URL/register", {
         credentials: "include",
         method: "post",
         cache: "no-cache",

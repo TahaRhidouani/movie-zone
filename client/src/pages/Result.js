@@ -10,7 +10,7 @@ const Result = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("/search", {
+    fetch("/process.env.PUBLIC_URL/search", {
       credentials: "include",
       method: "post",
       cache: "no-cache",

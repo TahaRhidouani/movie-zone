@@ -15,7 +15,7 @@ const List = (props) => {
       requestInfo = { category: props.category.url, type: props.category.type };
     }
 
-    fetch("/list", {
+    fetch("/process.env.PUBLIC_URL/list", {
       credentials: "include",
       method: "post",
       cache: "no-cache",
