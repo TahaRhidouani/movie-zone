@@ -5,7 +5,7 @@ const User = (props) => {
   const [userInfo, setUserInfo] = useState(false);
 
   async function logout() {
-    fetch("http://localhost:1112/logout", {
+    fetch("/logout", {
       credentials: "include",
       method: "post",
       cache: "no-cache",
@@ -19,7 +19,7 @@ const User = (props) => {
   }
 
   useEffect(() => {
-    fetch("http://localhost:1112/user", { credentials: "include", cache: "no-cache" }).then(async (response) => {
+    fetch("/user", { credentials: "include", cache: "no-cache" }).then(async (response) => {
       if (response.ok) setUserInfo(await response.json());
     });
   }, [props]);

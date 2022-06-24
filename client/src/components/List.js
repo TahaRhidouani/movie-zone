@@ -15,7 +15,7 @@ const List = (props) => {
       requestInfo = { category: props.category.url, type: props.category.type };
     }
 
-    fetch("http://localhost:1112/list", {
+    fetch("/list", {
       credentials: "include",
       method: "post",
       cache: "no-cache",

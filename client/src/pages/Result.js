@@ -10,7 +10,7 @@ const Result = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("http://localhost:1112/search", {
+    fetch("/search", {
       credentials: "include",
       method: "post",
       cache: "no-cache",

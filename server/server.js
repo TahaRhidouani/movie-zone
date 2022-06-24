@@ -1,13 +1,18 @@
 const express = require("express");
 const db = require("better-sqlite3")("moviezone.db");
+const path = require("path");
 const app = express();
 const cors = require("cors");
 const session = require("express-session");
 
-app.use(cors({ credentials: true, origin: "http://localhost:1113" }));
+const PORT = process.env.PORT || 8080;
+
+app.use(cors({ credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: "movie-zone-secret-key", resave: false, saveUninitialized: false }));
 app.use(express.json());
+
+app.use(express.static(path.resolve(__dirname, "../client/build")));
 
 app.post("/login", (req, res) => {
   if (validCredentials(req.body.username, req.body.password)) {
@@ -192,8 +197,8 @@ app.delete("/watchlist/:id", (req, res) => {
   res.status(200).send();
 });
 
-app.listen(1112, () => {
-  console.log("listening on port 1112");
+app.listen(PORT, () => {
+  console.log("listening on port " + PORT);
 });
 
 function validCredentials(username, password) {

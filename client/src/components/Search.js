@@ -21,7 +21,7 @@ export const Search = (props) => {
     const search = document.activeElement?.value;
     setAutocompleteOpen(search !== "");
 
-    fetch("http://localhost:1112/search", {
+    fetch("/search", {
       credentials: "include",
       method: "post",
       cache: "no-cache",

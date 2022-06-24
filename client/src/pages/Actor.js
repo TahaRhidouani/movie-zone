@@ -10,7 +10,7 @@ const Actor = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("http://localhost:1112/actors/" + id, {
+    fetch("/actors/" + id, {
       credentials: "include",
       method: "post",
       cache: "no-cache",
