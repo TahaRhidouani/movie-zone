@@ -15,7 +15,7 @@ const Movie = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("/" + process.env.PUBLIC_URL + "/" + props.type + "/" + id, {
+    fetch(process.env.PUBLIC_URL + "/" + props.type + "/" + id, {
       credentials: "include",
       method: "post",
       cache: "no-cache",
@@ -29,7 +29,7 @@ const Movie = (props) => {
   }, [props, id]);
 
   function toggleWatchlist() {
-    fetch("/" + process.env.PUBLIC_URL + "/watchlist/" + id, {
+    fetch(process.env.PUBLIC_URL + "/watchlist/" + id, {
       credentials: "include",
       method: !inWatchlist ? "post" : "delete",
       cache: "no-cache",
