@@ -10,7 +10,7 @@ const Movies = (props) => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    fetch("/process.env.PUBLIC_URL/" + props.type + "/" + category, {
+    fetch("/" + process.env.PUBLIC_URL + "/" + props.type + "/" + category, {
       credentials: "include",
       method: "get",
       cache: "no-cache",
