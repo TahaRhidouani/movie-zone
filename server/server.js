@@ -6,6 +6,7 @@ const cors = require("cors");
 const session = require("express-session");
 
 const PORT = process.env.PORT || 8080;
+const YEAR = 2022; // new Date().getFullYear();
 
 app.use(cors({ credentials: true }));
 app.use(express.urlencoded({ extended: true }));
@@ -65,7 +66,7 @@ app.post("/list", (req, res) => {
   } else {
     if (req.body.category == "new") {
       const query = db.prepare("SELECT movieid, title, year, type, poster FROM movies WHERE (type = ? AND year = ?) LIMIT 20;");
-      for (let movie of query.all(req.body.type, new Date().getFullYear())) list.push({ id: movie.movieid, title: movie.title, subtitle: movie.year, type: movie.type, picture: movie.poster });
+      for (let movie of query.all(req.body.type, YEAR)) list.push({ id: movie.movieid, title: movie.title, subtitle: movie.year, type: movie.type, picture: movie.poster });
     } else if (req.body.category == "popular") {
       const query = db.prepare("SELECT movieid, title, year, type, poster FROM movies WHERE type = ? ORDER BY popularity desc LIMIT 20;");
       for (let movie of query.all(req.body.type)) list.push({ id: movie.movieid, title: movie.title, subtitle: movie.year, type: movie.type, picture: movie.poster });
@@ -130,7 +131,7 @@ app.get("/:type/new", (req, res) => {
   let list = [];
 
   const query = db.prepare("SELECT movieid, title, year, type, poster FROM movies WHERE (type = ? AND year = ?) LIMIT 100;");
-  for (let movie of query.all(req.params.type, new Date().getFullYear())) list.push({ id: movie.movieid, title: movie.title, subtitle: movie.year, type: movie.type, picture: movie.poster });
+  for (let movie of query.all(req.params.type, YEAR)) list.push({ id: movie.movieid, title: movie.title, subtitle: movie.year, type: movie.type, picture: movie.poster });
 
   res.status(200).send(list);
 });
