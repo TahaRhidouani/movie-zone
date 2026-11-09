@@ -56,3 +56,19 @@
 ![search](./images/screenshot_8.png)
 
 <br />
+
+## Run
+
+Every push to `main` builds the image `ghcr.io/taharhidouani/movie-zone` (tags `main` and `sha-<commit>`). The container listens on port 8080, answers `GET /healthz` and serves the React client built for `/projects/movie-zone/` (`homepage` in `client/package.json`).
+
+| Variable | Purpose |
+| --- | --- |
+| `DB_PATH` | SQLite database file, `/data/moviezone.db` in the image (`moviezone.db` in the working directory otherwise) |
+| `SESSION_SECRET` | Random string that signs session cookies; without it sessions reset on every restart |
+| `PORT` | Listen port, default 8080 |
+
+```sh
+docker run -p 8080:8080 -v movie-zone-data:/data -e SESSION_SECRET=change-me ghcr.io/taharhidouani/movie-zone:main
+```
+
+The database lives in the `/data` volume, which must be writable by uid 1000. Create it from the dump with `sqlite3 moviezone.db < server/moviezone.sql`.

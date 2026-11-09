@@ -1,6 +1,7 @@
 const express = require("express");
-const db = require("better-sqlite3")("moviezone.db");
+const db = require("better-sqlite3")(process.env.DB_PATH || "moviezone.db");
 const path = require("path");
+const crypto = require("crypto");
 const app = express();
 const cors = require("cors");
 const session = require("express-session");
@@ -8,9 +9,13 @@ const session = require("express-session");
 const PORT = process.env.PORT || 8080;
 const YEAR = 2022; // new Date().getFullYear();
 
+app.set("trust proxy", true);
+
+app.get("/healthz", (req, res) => res.status(200).send("ok"));
+
 app.use(cors({ credentials: true }));
 app.use(express.urlencoded({ extended: true }));
-app.use(session({ secret: "movie-zone-secret-key", resave: false, saveUninitialized: false }));
+app.use(session({ secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"), resave: false, saveUninitialized: false, cookie: { secure: "auto", sameSite: "lax" } }));
 app.use(express.json());
 
 app.use(express.static(path.resolve(__dirname, "../client/build")));
@@ -81,9 +86,10 @@ app.post("/list", (req, res) => {
 
 app.post("/search", (req, res) => {
   let results = [];
-  const query = db.prepare("SELECT movieid as id, title as name, type, poster as picture, popularity FROM movies WHERE name LIKE '%" + req.body.search + "%' UNION SELECT actorid, name, 'actors', picture, popularity FROM actors WHERE name LIKE '%" + req.body.search + "%' ORDER BY popularity desc LIMIT ?;");
+  const term = "%" + req.body.search + "%";
+  const query = db.prepare("SELECT movieid as id, title as name, type, poster as picture, popularity FROM movies WHERE name LIKE ? UNION SELECT actorid, name, 'actors', picture, popularity FROM actors WHERE name LIKE ? ORDER BY popularity desc LIMIT ?;");
 
-  for (let result of query.all(req.body.maxResult)) {
+  for (let result of query.all(term, term, req.body.maxResult)) {
     let type;
 
     if (result.type == "movies") type = "Movie";
