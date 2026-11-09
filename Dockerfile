@@ -5,7 +5,8 @@ RUN npm ci --no-audit --no-fund
 COPY client/ ./
 RUN npm run build
 
-FROM node:26.13.0-slim AS server
+# Full image: npm runs node-gyp for better-sqlite3, which needs python3, make and g++
+FROM node:26.13.0 AS server
 WORKDIR /app/server
 COPY server/package.json server/package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund
