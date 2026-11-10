@@ -2,12 +2,17 @@ const express = require("express");
 const db = require("better-sqlite3")(process.env.DB_PATH || "moviezone.db");
 const path = require("path");
 const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const app = express();
 const cors = require("cors");
 const session = require("express-session");
 
 const PORT = process.env.PORT || 8080;
 const YEAR = 2022; // new Date().getFullYear();
+const BCRYPT_HASH = /^\$2[aby]\$/;
+
+// Hash any password still stored in plain text before the first login is checked
+const passwordsMigrated = migratePasswords();
 
 app.set("trust proxy", true);
 
@@ -23,11 +28,6 @@ app.set("json replacer", (key, value) => (IMAGE_SIZES[key] && typeof value === "
 
 app.get("/healthz", (req, res) => res.status(200).send("ok"));
 
-app.use(cors({ credentials: true }));
-app.use(express.urlencoded({ extended: true }));
-app.use(session({ secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"), resave: false, saveUninitialized: false, cookie: { secure: "auto", sameSite: "lax" } }));
-app.use(express.json());
-
 app.use(express.static(path.resolve(__dirname, "../client/build")));
 
 // Browser navigation to a client route gets the React app. Some client routes share a GET path
@@ -37,40 +37,59 @@ app.get("*", (req, res, next) => {
   res.sendFile(path.resolve(__dirname, "../client/build/index.html"));
 });
 
-app.post("/login", (req, res) => {
-  if (validCredentials(req.body.username, req.body.password)) {
-    req.session.username = req.body.username;
-    req.session.password = req.body.password;
+app.use(cors({ credentials: true }));
+app.use(express.urlencoded({ extended: true }));
+app.use(session({ secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"), resave: false, saveUninitialized: false, cookie: { secure: "auto", sameSite: "lax" } }));
+app.use(express.json());
+
+// The session holds the username only: load that user, or clear a session whose user no longer exists
+app.use((req, res, next) => {
+  if (req.session.username) {
+    req.user = db.prepare("SELECT username, email FROM users WHERE username = ?").get(req.session.username);
+    if (!req.user) req.session.username = undefined;
+  }
+  next();
+});
+
+app.post("/login", async (req, res) => {
+  if (!validCredentialInput(req.body.username, req.body.password)) return res.status(401).send();
+  await passwordsMigrated;
+
+  const user = await findUser(req.body.username, req.body.password);
+  if (user) {
+    req.session.username = user.username;
     res.status(200).send();
   } else {
     res.status(401).send();
   }
 });
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
+  if (!validCredentialInput(req.body.username, req.body.password) || typeof req.body.email !== "string") return res.status(400).send();
+  await passwordsMigrated;
+
+  // Hash first so the checks and the insert below run without a gap
+  const password = await bcrypt.hash(req.body.password, 10);
+
   if (userExists(req.body.username)) {
     res.status(400).send();
   } else if (emailExists(req.body.email)) {
     res.status(401).send();
   } else {
-    db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)").run(req.body.username, req.body.email, req.body.password);
+    db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)").run(req.body.username, req.body.email, password);
     req.session.username = req.body.username;
-    req.session.password = req.body.password;
     res.status(200).send();
   }
 });
 
 app.post("/logout", (req, res) => {
   req.session.username = undefined;
-  req.session.password = undefined;
   res.status(200).send();
 });
 
 app.get("/user", (req, res) => {
-  let userInfo = getInformation(req.session.username, req.session.password);
-
-  if (userInfo) {
-    res.status(200).send(userInfo);
+  if (req.user) {
+    res.status(200).send(req.user);
   } else {
     res.status(401).send();
   }
@@ -175,7 +194,7 @@ app.post("/movies/:id", (req, res) => {
   const result = query.get(req.params.id);
   if (!result) return res.status(404).send();
 
-  res.status(200).send({ id: result.movieid, title: result.title, description: result.description, watchlist: inWatchlist(req.session.username, req.session.password, req.params.id), trailer: result.trailer, poster: result.poster, backdrop: result.backdrop, rating: result.rating, duration: result.duration, year: result.year, crew: result.director.split(","), genre: result.genre.replace(/,/g, ", "), budget: result.budget, revenue: result.revenue, watch: result.website });
+  res.status(200).send({ id: result.movieid, title: result.title, description: result.description, watchlist: inWatchlist(req.user, req.params.id), trailer: result.trailer, poster: result.poster, backdrop: result.backdrop, rating: result.rating, duration: result.duration, year: result.year, crew: result.director.split(","), genre: result.genre.replace(/,/g, ", "), budget: result.budget, revenue: result.revenue, watch: result.website });
 });
 
 app.post("/shows/:id", (req, res) => {
@@ -183,7 +202,7 @@ app.post("/shows/:id", (req, res) => {
   const result = query.get(req.params.id);
   if (!result) return res.status(404).send();
 
-  res.status(200).send({ id: result.movieid, title: result.title, description: result.description, watchlist: inWatchlist(req.session.username, req.session.password, req.params.id), trailer: result.trailer, poster: result.poster, backdrop: result.backdrop, rating: result.rating, seasons: result.seasons, episodes: result.episodes, year: result.year, status: result.status, crew: result.director.split(","), genre: result.genre.replace(/,/g, ", "), watch: result.website });
+  res.status(200).send({ id: result.movieid, title: result.title, description: result.description, watchlist: inWatchlist(req.user, req.params.id), trailer: result.trailer, poster: result.poster, backdrop: result.backdrop, rating: result.rating, seasons: result.seasons, episodes: result.episodes, year: result.year, status: result.status, crew: result.director.split(","), genre: result.genre.replace(/,/g, ", "), watch: result.website });
 });
 
 app.post("/actors/:id", (req, res) => {
@@ -195,33 +214,33 @@ app.post("/actors/:id", (req, res) => {
 });
 
 app.get("/watchlist", (req, res) => {
-  if (!validCredentials(req.session.username, req.session.password)) return res.status(401).send();
+  if (!req.user) return res.status(401).send();
 
   let info = {
-    username: req.session.username,
+    username: req.user.username,
     watchlist: [],
   };
 
   const query = db.prepare("SELECT movieid, title, year, type, poster FROM movies JOIN (SELECT movieid as id FROM watchlist WHERE username = ?) ON movieid = id;");
-  for (let movie of query.all(req.session.username)) info.watchlist.push({ id: movie.movieid, title: movie.title, subtitle: movie.year, type: movie.type, picture: movie.poster });
+  for (let movie of query.all(req.user.username)) info.watchlist.push({ id: movie.movieid, title: movie.title, subtitle: movie.year, type: movie.type, picture: movie.poster });
 
   res.status(200).send(info);
 });
 
 app.post("/watchlist/:id", (req, res) => {
-  if (!validCredentials(req.session.username, req.session.password)) return res.status(401).send();
-  if (inWatchlist(req.session.username, req.session.password, req.params.id)) return res.status(200).send();
+  if (!req.user) return res.status(401).send();
+  if (inWatchlist(req.user, req.params.id)) return res.status(200).send();
 
-  db.prepare("INSERT INTO watchlist (username, movieid) VALUES (?, ?)").run(req.session.username, req.params.id);
+  db.prepare("INSERT INTO watchlist (username, movieid) VALUES (?, ?)").run(req.user.username, req.params.id);
 
   res.status(200).send();
 });
 
 app.delete("/watchlist/:id", (req, res) => {
-  if (!validCredentials(req.session.username, req.session.password)) return res.status(401).send();
-  if (!inWatchlist(req.session.username, req.session.password, req.params.id)) return res.status(200).send();
+  if (!req.user) return res.status(401).send();
+  if (!inWatchlist(req.user, req.params.id)) return res.status(200).send();
 
-  db.prepare("DELETE FROM watchlist WHERE (username = ? AND movieid = ?)").run(req.session.username, req.params.id);
+  db.prepare("DELETE FROM watchlist WHERE (username = ? AND movieid = ?)").run(req.user.username, req.params.id);
 
   res.status(200).send();
 });
@@ -230,9 +249,26 @@ app.listen(PORT, () => {
   console.log("listening on port " + PORT);
 });
 
-function validCredentials(username, password) {
-  const query = db.prepare("SELECT * FROM users WHERE (username = ? OR email = ?) AND password = ?");
-  return query.get(username, username, password) != undefined;
+// Usernames and passwords must be text, and bcrypt only uses the first 72 bytes of a password
+function validCredentialInput(username, password) {
+  return typeof username === "string" && typeof password === "string" && Buffer.byteLength(password) <= 72;
+}
+
+// Find the user whose username or email matches and whose password matches its stored hash
+async function findUser(login, password) {
+  for (const user of db.prepare("SELECT username, password FROM users WHERE username = ? OR email = ?").all(login, login)) {
+    if (BCRYPT_HASH.test(user.password) && (await bcrypt.compare(password, user.password))) return user;
+  }
+}
+
+// Hash any password still stored in plain text. Runs on every start and does nothing once none are left.
+async function migratePasswords() {
+  const users = db.prepare("SELECT username, password FROM users WHERE typeof(password) = 'text' AND password NOT GLOB '$2[aby]$*'").all();
+  for (const user of users) {
+    db.prepare("UPDATE users SET password = ? WHERE username = ? AND password = ?").run(await bcrypt.hash(user.password, 10), user.username, user.password);
+  }
+
+  if (users.length) console.log(`Hashed ${users.length} stored passwords`);
 }
 
 function userExists(username) {
@@ -245,18 +281,11 @@ function emailExists(email) {
   return query.get(email) != undefined;
 }
 
-function getInformation(username, password) {
-  if (!validCredentials(username, password)) return false;
-
-  const query = db.prepare("SELECT username, email FROM users WHERE username = ? OR email = ?");
-  return query.get(username, username);
-}
-
-function inWatchlist(username, password, movieid) {
-  if (!validCredentials(username, password)) return false;
+function inWatchlist(user, movieid) {
+  if (!user) return false;
 
   const query = db.prepare("SELECT * FROM watchlist WHERE (username = ? AND movieid = ?);");
-  return query.get(username, movieid) != undefined;
+  return query.get(user.username, movieid) != undefined;
 }
 
 function computeAge(birth, death) {
