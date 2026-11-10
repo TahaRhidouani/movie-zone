@@ -51,34 +51,43 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/login", async (req, res) => {
+// Errors in these async handlers go to Express (a 500) instead of crashing the process, for example before the data is restored
+app.post("/login", async (req, res, next) => {
   if (!validCredentialInput(req.body.username, req.body.password)) return res.status(401).send();
   await passwordsMigrated;
 
-  const user = await findUser(req.body.username, req.body.password);
-  if (user) {
-    req.session.username = user.username;
-    res.status(200).send();
-  } else {
-    res.status(401).send();
+  try {
+    const user = await findUser(req.body.username, req.body.password);
+    if (user) {
+      req.session.username = user.username;
+      res.status(200).send();
+    } else {
+      res.status(401).send();
+    }
+  } catch (error) {
+    next(error);
   }
 });
 
-app.post("/register", async (req, res) => {
+app.post("/register", async (req, res, next) => {
   if (!validCredentialInput(req.body.username, req.body.password) || typeof req.body.email !== "string") return res.status(400).send();
   await passwordsMigrated;
 
-  // Hash first so the checks and the insert below run without a gap
-  const password = await bcrypt.hash(req.body.password, 10);
+  try {
+    // Hash first so the checks and the insert below run without a gap
+    const password = await bcrypt.hash(req.body.password, 10);
 
-  if (userExists(req.body.username)) {
-    res.status(400).send();
-  } else if (emailExists(req.body.email)) {
-    res.status(401).send();
-  } else {
-    db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)").run(req.body.username, req.body.email, password);
-    req.session.username = req.body.username;
-    res.status(200).send();
+    if (userExists(req.body.username)) {
+      res.status(400).send();
+    } else if (emailExists(req.body.email)) {
+      res.status(401).send();
+    } else {
+      db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)").run(req.body.username, req.body.email, password);
+      req.session.username = req.body.username;
+      res.status(200).send();
+    }
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -261,14 +270,21 @@ async function findUser(login, password) {
   }
 }
 
-// Hash any password still stored in plain text. Runs on every start and does nothing once none are left.
+// Hash any password still stored in plain text. Runs on every start and does nothing once none are left;
+// skips an empty database (no users table yet) and never stops the server on failure.
 async function migratePasswords() {
-  const users = db.prepare("SELECT username, password FROM users WHERE typeof(password) = 'text' AND password NOT GLOB '$2[aby]$*'").all();
-  for (const user of users) {
-    db.prepare("UPDATE users SET password = ? WHERE username = ? AND password = ?").run(await bcrypt.hash(user.password, 10), user.username, user.password);
-  }
+  try {
+    if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'users'").get()) return;
 
-  if (users.length) console.log(`Hashed ${users.length} stored passwords`);
+    const users = db.prepare("SELECT username, password FROM users WHERE typeof(password) = 'text' AND password NOT GLOB '$2[aby]$*'").all();
+    for (const user of users) {
+      db.prepare("UPDATE users SET password = ? WHERE username = ? AND password = ?").run(await bcrypt.hash(user.password, 10), user.username, user.password);
+    }
+
+    if (users.length) console.log(`Hashed ${users.length} stored passwords`);
+  } catch (error) {
+    console.error("Password migration failed:", error.message);
+  }
 }
 
 function userExists(username) {
