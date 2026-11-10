@@ -20,6 +20,13 @@ app.use(express.json());
 
 app.use(express.static(path.resolve(__dirname, "../client/build")));
 
+// Browser navigation to a client route gets the React app. Some client routes share a GET path
+// with the API (for example /movies/popular), but the client's fetch() calls send Accept: */*.
+app.get("*", (req, res, next) => {
+  if (path.extname(req.path) || req.accepts(["json", "html"]) !== "html") return next();
+  res.sendFile(path.resolve(__dirname, "../client/build/index.html"));
+});
+
 app.post("/login", (req, res) => {
   if (validCredentials(req.body.username, req.body.password)) {
     req.session.username = req.body.username;
@@ -85,6 +92,8 @@ app.post("/list", (req, res) => {
 });
 
 app.post("/search", (req, res) => {
+  if (typeof req.body.search !== "string" || !Number.isInteger(req.body.maxResult)) return res.status(400).send();
+
   let results = [];
   const term = "%" + req.body.search + "%";
   const query = db.prepare("SELECT movieid as id, title as name, type, poster as picture, popularity FROM movies WHERE name LIKE ? UNION SELECT actorid, name, 'actors', picture, popularity FROM actors WHERE name LIKE ? ORDER BY popularity desc LIMIT ?;");
@@ -154,6 +163,7 @@ app.get("/:type/toprated", (req, res) => {
 app.post("/movies/:id", (req, res) => {
   const query = db.prepare("SELECT * FROM movies WHERE movieid = ?;");
   const result = query.get(req.params.id);
+  if (!result) return res.status(404).send();
 
   res.status(200).send({ id: result.movieid, title: result.title, description: result.description, watchlist: inWatchlist(req.session.username, req.session.password, req.params.id), trailer: result.trailer, poster: result.poster, backdrop: result.backdrop, rating: result.rating, duration: result.duration, year: result.year, crew: result.director.split(","), genre: result.genre.replace(/,/g, ", "), budget: result.budget, revenue: result.revenue, watch: result.website });
 });
@@ -161,6 +171,7 @@ app.post("/movies/:id", (req, res) => {
 app.post("/shows/:id", (req, res) => {
   const query = db.prepare("SELECT * FROM movies WHERE movieid = ?;");
   const result = query.get(req.params.id);
+  if (!result) return res.status(404).send();
 
   res.status(200).send({ id: result.movieid, title: result.title, description: result.description, watchlist: inWatchlist(req.session.username, req.session.password, req.params.id), trailer: result.trailer, poster: result.poster, backdrop: result.backdrop, rating: result.rating, seasons: result.seasons, episodes: result.episodes, year: result.year, status: result.status, crew: result.director.split(","), genre: result.genre.replace(/,/g, ", "), watch: result.website });
 });
@@ -168,6 +179,7 @@ app.post("/shows/:id", (req, res) => {
 app.post("/actors/:id", (req, res) => {
   const query = db.prepare("SELECT * FROM actors WHERE actorid = ?;");
   const result = query.get(req.params.id);
+  if (!result) return res.status(404).send();
 
   res.status(200).send({ name: result.name, picture: result.picture, biography: result.biography, birthday: result.birthday, age: computeAge(result.birthday, result.deathday), birthplace: result.birthplace, deathday: result?.deathday?.replace(/-/g, "/"), gender: result.gender, credits: result.credits });
 });

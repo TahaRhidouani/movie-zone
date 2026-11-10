@@ -19,7 +19,7 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: document.getElementById("username").value, password: document.getElementById("password").value }),
       }).then((response) => {
-        if (response.ok) window.location = "/";
+        if (response.ok) window.location = process.env.PUBLIC_URL + "/";
         if (response.status === 401) setError("Incorrect credentials");
       });
     }
@@ -40,7 +40,7 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: document.getElementById("username").value, email: document.getElementById("email").value, password: document.getElementById("password1").value }),
       }).then((response) => {
-        if (response.ok) window.location = "/";
+        if (response.ok) window.location = process.env.PUBLIC_URL + "/";
         if (response.status === 400) setError("Username already exists");
         if (response.status === 401) setError("Email already taken");
       });

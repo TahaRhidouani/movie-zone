@@ -13,7 +13,7 @@ const User = (props) => {
     }).then((response) => {
       if (response.ok) {
         setUserInfo(false);
-        window.location = "/";
+        window.location = process.env.PUBLIC_URL + "/";
       }
     });
   }
@@ -31,7 +31,7 @@ const User = (props) => {
           {" "}
           {userInfo.username}{" "}
         </Link>
-        <a onClick={logout} href="/">
+        <a onClick={logout} href={process.env.PUBLIC_URL + "/"}>
           Logout
         </a>
       </div>
