@@ -59,8 +59,7 @@ app.post("/login", async (req, res, next) => {
   try {
     const user = await findUser(req.body.username, req.body.password);
     if (user) {
-      req.session.username = user.username;
-      res.status(200).send();
+      signIn(req, user.username, (err) => (err ? next(err) : res.status(200).send()));
     } else {
       res.status(401).send();
     }
@@ -83,17 +82,20 @@ app.post("/register", async (req, res, next) => {
       res.status(401).send();
     } else {
       db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)").run(req.body.username, req.body.email, password);
-      req.session.username = req.body.username;
-      res.status(200).send();
+      signIn(req, req.body.username, (err) => (err ? next(err) : res.status(200).send()));
     }
   } catch (error) {
     next(error);
   }
 });
 
-app.post("/logout", (req, res) => {
-  req.session.username = undefined;
-  res.status(200).send();
+app.post("/logout", (req, res, next) => {
+  // End the session and drop its cookie, so the old session ID no longer works
+  req.session.destroy((err) => {
+    if (err) return next(err);
+    res.clearCookie("connect.sid");
+    res.status(200).send();
+  });
 });
 
 app.get("/user", (req, res) => {
@@ -257,6 +259,15 @@ app.delete("/watchlist/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log("listening on port " + PORT);
 });
+
+// Give the signed-in user a new session ID (against session fixation) that holds only the username
+function signIn(req, username, callback) {
+  req.session.regenerate((err) => {
+    if (err) return callback(err);
+    req.session.username = username;
+    req.session.save(callback);
+  });
+}
 
 // Usernames and passwords must be text, and bcrypt only uses the first 72 bytes of a password
 function validCredentialInput(username, password) {
