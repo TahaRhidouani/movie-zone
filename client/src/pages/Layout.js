@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo.webp";
 import popularIcon from "../assets/icons/popular.png";
 import newReleaseIcon from "../assets/icons/new.png";
 import topRatedIcon from "../assets/icons/rating.png";

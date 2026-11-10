@@ -1,6 +1,6 @@
 import Search from "../components/Search";
 import List from "../components/List";
-const mainPoster = require("../assets/pictures/" + Math.floor(Math.random() * (5 - 1 + 1) + 1) + ".png");
+const mainPoster = require("../assets/pictures/" + Math.floor(Math.random() * (5 - 1 + 1) + 1) + ".webp");
 
 function Home() {
   return (

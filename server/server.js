@@ -17,6 +17,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// TMDB images are stored at their original size; send the size each one is shown at
+const IMAGE_SIZES = { picture: "w342", poster: "w342", backdrop: "w1280" };
+app.set("json replacer", (key, value) => (IMAGE_SIZES[key] && typeof value === "string" ? value.replace("/t/p/original/", "/t/p/" + IMAGE_SIZES[key] + "/") : value));
+
 app.get("/healthz", (req, res) => res.status(200).send("ok"));
 
 app.use(cors({ credentials: true }));

@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import Item from "../components/Item";
-const mainPoster = require("../assets/pictures/" + Math.floor(Math.random() * (5 - 1 + 1) + 1) + ".png");
+const mainPoster = require("../assets/pictures/" + Math.floor(Math.random() * (5 - 1 + 1) + 1) + ".webp");
 
 const Profil = (props) => {
   const [userInfo, setUserInfo] = useState({});

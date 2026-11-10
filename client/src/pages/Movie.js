@@ -45,7 +45,7 @@ const Movie = (props) => {
 
   return (
     <div>
-      <div className="movie_poster" style={{ backgroundImage: "linear-gradient(to right, rgba(207,96,84, 1) 0%, rgba(207,96,84,1) 20%, rgba(207,96,84,0.6) 80%), url('" + movie.backdrop + "')" }}>
+      <div className="movie_poster" style={{ backgroundImage: "linear-gradient(to right, rgba(207,96,84, 1) 0%, rgba(207,96,84,1) 20%, rgba(207,96,84,0.6) 80%)" + (movie.backdrop ? ", url('" + movie.backdrop + "')" : "") }}>
         <div className="movie_poster_overlay">
           <img src={movie.poster} />
           <div className="movie_poster_text">
