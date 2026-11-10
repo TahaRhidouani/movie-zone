@@ -11,6 +11,12 @@ const YEAR = 2022; // new Date().getFullYear();
 
 app.set("trust proxy", true);
 
+// Client routes and API routes can share a URL and differ only by Accept, so caches must key on it
+app.use((req, res, next) => {
+  res.vary("Accept");
+  next();
+});
+
 app.get("/healthz", (req, res) => res.status(200).send("ok"));
 
 app.use(cors({ credentials: true }));
